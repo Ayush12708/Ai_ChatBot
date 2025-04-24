@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citizen Services Bot - Map</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f6f8fc, #e2e8f0, #dbeafe, #f3e8ff, #d9f99d);
+            color: #2d3748;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+            animation: bgGradient 15s ease infinite;
+            background-size: 300% 300%;
+        }
+
+        @keyframes bgGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body.dark {
+            background: linear-gradient(135deg, #1f2633, #374151, #1e3a8a, #4a044e, #15803d);
+            color: #e2e8f0;
+            animation: bgGradientDark 15s ease infinite;
+            background-size: 300% 300%;
+        }
+
+        @keyframes bgGradientDark {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 0.75rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        body.dark header {
+            background-color: #2d3748;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+            animation: titleGlow 6s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 10px rgba(59, 130, 246, 0.3), 0 0 20px rgba(236, 72, 153, 0.3), 0 0 30px rgba(16, 185, 129, 0.3); }
+            33% { text-shadow: 0 0 15px rgba(236, 72, 153, 0.5), 0 0 25px rgba(16, 185, 129, 0.5), 0 0 35px rgba(59, 130, 246, 0.5); }
+            66% { text-shadow: 0 0 15px rgba(16, 185, 129, 0.5), 0 0 25px rgba(59, 130, 246, 0.5), 0 0 35px rgba(236, 72, 153, 0.5); }
+            100% { text-shadow: 0 0 10px rgba(59, 130, 246, 0.3), 0 0 20px rgba(236, 72, 153, 0.3), 0 0 30px rgba(16, 185, 129, 0.3); }
+        }
+
+        body.dark header h1 {
+            color: #60a5fa;
+            text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+        }
+
+        header p {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #6b7280;
+            margin-top: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        body.dark header p {
+            color: #cbd5e1;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 0.75rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+            color: #6b7280;
+            transition: color 0.3s, transform 0.2s, text-shadow 0.2s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        body.dark .theme-toggle {
+            color: #e2e8f0;
+        }
+
+        #map {
+            height: calc(100vh - 100px);
+            margin-top: 100px;
+            width: 100%;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: linear-gradient(145deg, #3b82f6, #ec4899, #16a34a, #facc15, #f87171);
+            color: #ffffff;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+            z-index: 1000;
+            animation: buttonGradient 6s ease infinite;
+            background-size: 400% 400%;
+        }
+
+        @keyframes buttonGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .back-button:hover {
+            background: linear-gradient(145deg, #2563eb, #db2777, #15803d, #eab308, #dc2626);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4), 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        body.dark .back-button {
+            background: linear-gradient(145deg, #60a5fa, #f472b6, #22c55e, #fef08a, #ef4444);
+            animation: buttonGradientDark 6s ease infinite;
+        }
+
+        @keyframes buttonGradientDark {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body.dark .back-button:hover {
+            background: linear-gradient(145deg, #3b82f6, #db2777, #16a34a, #facc15, #b91c1c);
+        }
+
+        .error-message {
+            position: fixed;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(145deg, #fee2e2, #fecaca);
+            color: #dc2626;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            font-size: 0.9rem;
+            max-width: 80%;
+            text-align: center;
+        }
+
+        body.dark .error-message {
+            background: linear-gradient(145deg, #4a1a1a, #3d1616);
+            color: #ff9999;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 0.5rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.25rem;
+            }
+
+            header p {
+                font-size: 0.7rem;
+            }
+
+            .theme-toggle {
+                top: 0.5rem;
+                font-size: 1rem;
+            }
+
+            .back-button {
+                top: 70px;
+                left: 10px;
+                padding: 0.5rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .error-message {
+                top: 100px;
+                font-size: 0.8rem;
+                padding: 0.5rem 1rem;
+            }
+
+            #map {
+                margin-top: 80px;
+                height: calc(100vh - 80px);
+            }
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8sZx5Yc-bQ5ZNDfT-KKRr2ThBvRiHFas&libraries=places" async defer></script>
+    <script>
+        let map;
+
+        function displayError(message, isBillingError = false) {
+            const existingError = document.querySelector(".error-message");
+            if (existingError) existingError.remove();
+
+            const errorDiv = document.createElement("div");
+            errorDiv.className = "error-message";
+            if (isBillingError) {
+                errorDiv.innerHTML = `${message} <a href="https://console.cloud.google.com/project/_/billing/enable" target="_blank" style="color: #2563eb; text-decoration: underline;">Enable Billing</a>`;
+            } else {
+                errorDiv.textContent = message;
+            }
+            document.body.appendChild(errorDiv);
+
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 7000);
+        }
+
+        function initMap() {
+            const mapElement = document.getElementById("map");
+            if (!mapElement) {
+                console.error("Map element not found");
+                displayError("Map container not found. Please try again.");
+                return;
+            }
+
+            try {
+                map = new google.maps.Map(mapElement, {
+                    center: { lat: 0, lng: 0 },
+                    zoom: 12
+                });
+            } catch (error) {
+                console.error("Error initializing map:", error);
+                displayError("Failed to load the map. Please check your internet connection or try again later.");
+                return;
+            }
+
+            // Check for BillingNotEnabledMapError via console errors
+            window.addEventListener("error", (event) => {
+                if (event.message.includes("BillingNotEnabledMapError")) {
+                    console.error("BillingNotEnabledMapError: Billing is not enabled for this project.");
+                    displayError(
+                        "Billing is not enabled for this project. Please enable billing in the Google Cloud Console.",
+                        true
+                    );
+                }
+            });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const city = urlParams.get("city");
+            const placeType = urlParams.get("placeType");
+
+            if (!city || !placeType) {
+                displayError("Please provide a city and place type (e.g., Aadhar center in Patna).");
+                return;
+            }
+
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: city }, (results, status) => {
+                if (status === "OK" && results[0]) {
+                    map.setCenter(results[0].geometry.location);
+                    new google.maps.Marker({
+                        map: map,
+                        position: results[0].geometry.location,
+                        title: city
+                    });
+
+                    const service = new google.maps.places.PlacesService(map);
+                    const request = {
+                        location: results[0].geometry.location,
+                        radius: 10000,
+                        type: placeType.toLowerCase().includes("aadhar") ? "government_office" : placeType.toLowerCase().replace(" ", "_"),
+                        keyword: placeType
+                    };
+
+                    service.nearbySearch(request, (places, status) => {
+                        if (status === google.maps.places.PlacesServiceStatus.OK && places.length > 0) {
+                            places.forEach(place => {
+                                const marker = new google.maps.Marker({
+                                    map: map,
+                                    position: place.geometry.location,
+                                    title: place.name,
+                                    icon: {
+                                        url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                                    }
+                                });
+
+                                const infoWindow = new google.maps.InfoWindow({
+                                    content: `
+                                        <div>
+                                            <h3>${place.name}</h3>
+                                            <p>${place.vicinity || "No address available"}</p>
+                                            ${place.rating ? `<p>Rating: ${place.rating}/5</p>` : ""}
+                                        </div>
+                                    `
+                                });
+
+                                marker.addListener("click", () => {
+                                    infoWindow.open(map, marker);
+                                });
+                            });
+                        } else {
+                            console.warn("Places API status:", status);
+                            if (status === "OVER_QUERY_LIMIT") {
+                                displayError("API quota exceeded. Please check your billing account or try again later.", true);
+                            } else {
+                                displayError(`No ${placeType} found in ${city}. Try a different place type or city.`);
+                            }
+                        }
+                    });
+                } else {
+                    console.error("Geocode error:", status);
+                    if (status === "OVER_QUERY_LIMIT") {
+                        displayError("API quota exceeded. Please check your billing account or try again later.", true);
+                    } else {
+                        displayError(`Could not find the city: ${city}. Please check the spelling or try another city.`);
+                    }
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const themeToggle = document.querySelector(".theme-toggle");
+            const header = document.querySelector("header");
+            themeToggle.addEventListener("click", () => {
+                const isDark = document.body.classList.toggle("dark");
+                themeToggle.textContent = isDark ? "☀️" : "🌙";
+
+                const transitionDiv = document.createElement("div");
+                transitionDiv.classList.add("theme-transition");
+                transitionDiv.style.backgroundColor = isDark ? "#2d3748" : "#ffffff";
+                header.appendChild(transitionDiv);
+
+                setTimeout(() => {
+                    transitionDiv.remove();
+                }, 500);
+            });
+
+            // Delay map initialization to ensure script is loaded
+            if (typeof google === "undefined") {
+                setTimeout(() => {
+                    if (typeof google === "undefined") {
+                        console.error("Google Maps API not loaded");
+                        displayError(
+                            "Failed to load Google Maps. Please check your API key, billing status, or internet connection.",
+                            true
+                        );
+                    } else {
+                        initMap();
+                    }
+                }, 2000);
+            } else {
+                initMap();
+            }
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Citizen Services Bot - Map</h1>
+        <p>Explore nearby services and resources</p>
+        <button class="theme-toggle" title="Toggle theme">🌙</button>
+    </header>
+    <button class="back-button" onclick="window.location.href='chat.html'">Back to Chat</button>
+    <div id="map"></div>
+</body>
+</html>
